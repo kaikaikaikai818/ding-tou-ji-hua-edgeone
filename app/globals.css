@@ -108,6 +108,7 @@ input:focus, select:focus { border-color:var(--jade); box-shadow:0 0 0 3px rgba(
 .account-card span,.account-card strong { display:block; }
 .account-card span { color:var(--muted); font-size:13px; font-weight:800; }
 .account-card strong { margin:10px 0 18px; font-size:23px; }
+.account-actions { display:flex; flex-wrap:wrap; gap:7px; }
 .index-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
 .index-card { border:1px solid var(--line); border-radius:20px; padding:17px; }
 .index-price { margin:16px 0 4px; font-size:25px; font-weight:900; }

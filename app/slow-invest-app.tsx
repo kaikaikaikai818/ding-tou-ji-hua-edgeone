@@ -24,6 +24,9 @@ type InstallPromptEvent = Event & {
 };
 
 const STORAGE_KEY = "ding-tou-ji-hua:state:v1";
+const MARKET_CACHE_KEY = "ding-tou-ji-hua:markets:v1";
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
+const assetUrl = (name:string) => `${BASE_PATH}/${name}`;
 
 const defaultAccounts: Account[] = [
   { id:"living", name:"生活账户", balance:0, tone:"blue" },
@@ -31,6 +34,7 @@ const defaultAccounts: Account[] = [
   { id:"opportunity", name:"机会账户", balance:0, tone:"orange" },
   { id:"reserve", name:"备用金", balance:0, tone:"purple" },
 ];
+const accountTones = ["blue","jade","orange","purple"];
 
 const legacyMethods:Record<string,string> = {
   NDX:"高点回撤 + 200日均线（成长型）", SPX:"一年回撤 + 200日均线（宽基）",
@@ -111,11 +115,12 @@ function normalizeAsset(asset:Asset):Asset {
 }
 
 function normalizeState(raw:Partial<AppState> & { emergencySaved?:number }) : AppState {
-  const accounts = Array.isArray(raw.accounts) && raw.accounts.length
+  const accounts = Array.isArray(raw.accounts)
     ? raw.accounts.map((account,index)=>({
-        ...defaultAccounts[index],
-        ...account,
+        id:account.id||uid(),
+        name:String(account.name||`账户 ${index+1}`).trim()||`账户 ${index+1}`,
         balance:Math.max(0,Number(account.balance)||0),
+        tone:account.tone||accountTones[index%accountTones.length],
       }))
     : defaultAccounts.map(a=>a.id==="reserve"?{...a,balance:Number(raw.emergencySaved||0)}:a);
   return {
@@ -135,8 +140,9 @@ export default function SlowInvestApp() {
   const [saving,setSaving]=useState(false);
   const [saveError,setSaveError]=useState(false);
   const [tab,setTab]=useState<"today"|"accounts"|"indexes"|"records">("today");
-  const [modal,setModal]=useState<"buy"|"asset"|"account"|"plan"|null>(null);
+  const [modal,setModal]=useState<"buy"|"asset"|"account"|"account-manage"|"plan"|null>(null);
   const [activeAccount,setActiveAccount]=useState<string>("living");
+  const [editingAccount,setEditingAccount]=useState<string|null>(null);
   const [markets,setMarkets]=useState<Record<string,Market>>({});
   const [marketLoading,setMarketLoading]=useState(false);
   const [accountDrafts,setAccountDrafts]=useState<Record<string,string>>({});
@@ -155,6 +161,8 @@ export default function SlowInvestApp() {
       try {
         const saved=localStorage.getItem(STORAGE_KEY);
         if(saved)setState(normalizeState(JSON.parse(saved)));
+        const savedMarkets=localStorage.getItem(MARKET_CACHE_KEY);
+        if(savedMarkets)setMarkets(JSON.parse(savedMarkets));
       } catch {
         setSaveError(true);
       } finally {
@@ -179,7 +187,7 @@ export default function SlowInvestApp() {
     return()=>clearTimeout(timer);
   },[state,loaded]);
   useEffect(()=>{
-    if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});
+    if("serviceWorker" in navigator)navigator.serviceWorker.register(assetUrl("sw.js"),{scope:`${BASE_PATH}/`}).catch(()=>{});
     const capture=(event:Event)=>{event.preventDefault();setInstallPrompt(event as InstallPromptEvent);};
     window.addEventListener("beforeinstallprompt",capture);
     return()=>window.removeEventListener("beforeinstallprompt",capture);
@@ -189,7 +197,7 @@ export default function SlowInvestApp() {
 
   const totalInvested=useMemo(()=>state.assets.reduce((sum,asset)=>sum+asset.cost,0),[state.assets]);
   const accountTotal=state.accounts.reduce((s,a)=>s+a.balance,0);
-  const reserve=state.accounts.find(a=>a.id==="reserve");
+  const reserve=state.accounts.find(a=>a.id==="reserve")||state.accounts.find(a=>/备用金|应急/.test(a.name));
   const emergencyPct=Math.min(100,state.emergencyTarget?(reserve?.balance||0)/state.emergencyTarget*100:0);
   const ratioTotal=state.assets.reduce((s,a)=>s+a.ratio,0);
   const now=atMidnight();
@@ -240,24 +248,39 @@ export default function SlowInvestApp() {
 
   async function refreshMarkets(){
     setMarketLoading(true);
-    const results=await Promise.all(state.assets.map(async a=>{
-      try{
-        const params=new URLSearchParams({code:a.code,name:a.name,kind:a.kind||"index"});if(a.symbol)params.set("symbol",a.symbol);
-        const r=await fetch(`/api/market?${params}`,{cache:"no-store"});
-        const data=await r.json() as Market;
-        return [a.id,r.ok?data:{error:data.error||"暂时取不到行情，请稍后重试"}] as const;
-      }catch{return[a.id,{error:"网络异常，请稍后重试"}] as const;}
-    }));
-    setMarkets(Object.fromEntries(results));
-    setMarketLoading(false);
+    try{
+      const r=await fetch(`${assetUrl("market-data.json")}?t=${Date.now()}`,{cache:"no-store"});
+      if(!r.ok)throw new Error();
+      const payload=await r.json() as {updatedAt?:string|null;markets?:Record<string,Market>};
+      const source=payload.markets||{};
+      const next=Object.fromEntries(state.assets.map(a=>{
+        const market=source[(a.symbol||"").toUpperCase()]||source[a.code.toUpperCase()];
+        return [a.id,market||{error:"这个指数暂时没有更新数据，请稍后再刷新"}];
+      }));
+      setMarkets(next);
+      localStorage.setItem(MARKET_CACHE_KEY,JSON.stringify(next));
+    }catch{
+      setMarkets(current=>Object.keys(current).length?current:Object.fromEntries(state.assets.map(a=>[a.id,{error:"暂时无法连接行情文件，请稍后再试"}])));
+    }finally{setMarketLoading(false);}
   }
   async function searchIndexes(){
     const query=indexQuery.trim(); if(!query)return;
     setIndexSearching(true); setIndexSearchError(""); setSelectedIndex(null);
     try{
-      const r=await fetch(`/api/index-search?q=${encodeURIComponent(query)}`,{cache:"no-store"});
-      const data=await r.json() as {results?:IndexSearchResult[]};
-      const results=data.results||[]; setIndexResults(results);
+      const r=await fetch(assetUrl("index-catalog.json"),{cache:"force-cache"});
+      if(!r.ok)throw new Error();
+      const catalog=await r.json() as Array<IndexSearchResult&{aliases?:string[]}>;
+      const normalize=(value:string)=>value.toUpperCase().replace(/[\s._^&-]/g,"");
+      const normalizedQuery=normalize(query);
+      const scored=catalog.map(item=>{
+        const values=[item.code,item.symbol,item.name,...(item.aliases||[])].map(normalize);
+        const score=values.some(v=>v===normalizedQuery)?3:values.some(v=>v.startsWith(normalizedQuery))?2:values.some(v=>v.includes(normalizedQuery))?1:0;
+        return {item,score};
+      }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).map(x=>x.item);
+      const raw=query.trim().toUpperCase();
+      const manual=/^\d{6}$/.test(raw)?{code:raw,symbol:raw.startsWith("399")?`${raw}.SZ`:`${raw}.SS`,name:`指数 ${raw}`,market:"中国内地（按代码添加）",kind:"index" as const}:null;
+      const results=[...scored,...(manual?[manual]:[])].filter((item,index,list)=>list.findIndex(x=>x.symbol===item.symbol)===index).slice(0,20);
+      setIndexResults(results);
       if(results.length===1)setSelectedIndex(results[0]);
       if(!results.length)setIndexSearchError("没有找到，请检查名称或代码。可输入如 黄金、000300、^NDX、GC=F。");
     }catch{setIndexSearchError("暂时无法搜索，请稍后再试。");setIndexResults([]);}
@@ -290,8 +313,33 @@ export default function SlowInvestApp() {
   }
   function deleteBuyRecord(id:string){ const r=state.records.find(x=>x.id===id); if(!r||!confirm("确定删除这条买入记录吗？"))return; setState(s=>({...s,records:s.records.filter(x=>x.id!==id),assets:s.assets.map(a=>a.id===r.assetId?{...a,cost:Math.max(0,a.cost-r.amount)}:a)})); }
   function deleteAccountRecord(id:string){ const r=state.accountRecords.find(x=>x.id===id); if(!r||!confirm("确定撤销这条账户记录吗？余额会自动回退。"))return; setState(s=>({...s,accountRecords:s.accountRecords.filter(x=>x.id!==id),accounts:s.accounts.map(a=>a.id===r.accountId?{...a,balance:a.balance-r.delta}:a)})); }
+  function openAccountManager(id?:string){
+    setEditingAccount(id||null);
+    setModal("account-manage");
+  }
+  function saveAccount(form:FormData){
+    const name=String(form.get("name")||"").trim();
+    if(!name)return;
+    const balance=Math.max(0,Number(form.get("balance"))||0);
+    const duplicated=state.accounts.some(a=>a.name===name&&a.id!==editingAccount);
+    if(duplicated){alert("已经有同名账户，请换一个名称。");return;}
+    if(editingAccount){
+      setState(s=>({...s,accounts:s.accounts.map(a=>a.id===editingAccount?{...a,name,balance}:a)}));
+    }else{
+      setState(s=>({...s,accounts:[...s.accounts,{id:uid(),name,balance,tone:accountTones[s.accounts.length%accountTones.length]}]}));
+    }
+    setModal(null);
+    setEditingAccount(null);
+  }
+  function deleteAccount(id:string){
+    const account=state.accounts.find(a=>a.id===id); if(!account)return;
+    if(!confirm(`确定删除“${account.name}”吗？\n\n账户流水会保留，但这个账户及当前余额将从总资产中移除。`))return;
+    setState(s=>({...s,accounts:s.accounts.filter(a=>a.id!==id)}));
+    setAccountDrafts(d=>{const next={...d};delete next[id];return next;});
+    if(activeAccount===id)setActiveAccount("");
+  }
   function exportData(){
-    const backup={app:"定投计划",version:1,exportedAt:new Date().toISOString(),state};
+    const backup={app:"定投计划",version:2,exportedAt:new Date().toISOString(),state};
     const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
     const a=document.createElement("a");
     a.href=URL.createObjectURL(blob);
@@ -343,14 +391,14 @@ export default function SlowInvestApp() {
           <section className="card"><div className="section-head"><div><h2 className="section-title">本次直接照着投</h2><div className="muted">按你的 {cadenceLabel(state.investPlan)} 计划拆分，本次合计 {money(installmentBudget)}。</div></div></div>{suggestions.length?suggestions.map(a=>{const market=markets[a.id];const failed=Boolean(market?.error);return <div className="suggestion" key={a.id}><div className="suggestion-main"><div><div className="name">{a.name}</div><div className="muted">基础比例 {a.ratio}% · {a.signal?.metricLabel||(failed?"本次按基础比例":"正在取得行情")}</div></div><div className="suggestion-right"><span className={`signal ${signalClass(a.signal?.level)}`}>{a.signal?.level||(failed?"正常投":marketLoading?"判断中":"正常投")}</span><div className="amount">{money(a.suggested)}</div></div></div><div className="reason">{a.signal?.reason||market?.error||"行情取得后会自动说明判断依据。"}</div></div>}):<div className="empty">先到“行情”添加你关注的品种</div>}</section>
         </div>
         <aside className="stack">
-          <section className="card"><div className="section-head"><div><h2 className="section-title">四个账户</h2><div className="muted">直接填写各账户现在的金额</div></div><span className="tag">合计 {money(accountTotal)}</span></div><div className="mini-accounts">{state.accounts.map(a=><label key={a.id} className={`mini-account ${a.tone}`}><span>{a.name}</span><div className="mini-account-input"><b>¥</b><input aria-label={`${a.name}当前金额`} type="text" inputMode="decimal" placeholder="0" value={accountDrafts[a.id]??(a.balance===0?"":String(a.balance))} onFocus={e=>e.currentTarget.select()} onChange={e=>editAccountBalance(a.id,e.target.value)} onBlur={()=>finishAccountBalance(a.id)}/></div></label>)}</div></section>
-          <section className="card"><div className="section-head"><h2 className="section-title">备用金进度</h2><span className="tag">目标 {money(state.emergencyTarget)}</span></div><div style={{fontSize:26,fontWeight:900}}>{money(reserve?.balance||0)}</div><div className="progress"><i style={{width:`${emergencyPct}%`}} /></div><div className="muted">已完成 {emergencyPct.toFixed(0)}%。当前金额可在上方直接修改；需要记录增减时再到“账户”页记一笔。</div><label>备用金目标</label><input type="number" value={state.emergencyTarget} onChange={e=>update({emergencyTarget:Math.max(0,+e.target.value)})}/></section>
+          <section className="card"><div className="section-head"><div><h2 className="section-title">我的账户</h2><div className="muted">{state.accounts.length?`${state.accounts.length} 个账户，金额会自动计入总资产`:"还没有账户，可以按自己的情况添加"}</div></div><div className="actions"><span className="tag">合计 {money(accountTotal)}</span><button className="button primary small" onClick={()=>openAccountManager()}>＋ 新增</button></div></div>{state.accounts.length?<div className="mini-accounts">{state.accounts.map(a=><label key={a.id} className={`mini-account ${a.tone}`}><span>{a.name}</span><div className="mini-account-input"><b>¥</b><input aria-label={`${a.name}当前金额`} type="text" inputMode="decimal" placeholder="0" value={accountDrafts[a.id]??(a.balance===0?"":String(a.balance))} onFocus={e=>e.currentTarget.select()} onChange={e=>editAccountBalance(a.id,e.target.value)} onBlur={()=>finishAccountBalance(a.id)}/></div></label>)}</div>:<div className="empty">点击“新增”，建立你的第一个账户</div>}</section>
+          <section className="card"><div className="section-head"><h2 className="section-title">备用金进度</h2><span className="tag">目标 {money(state.emergencyTarget)}</span></div>{reserve?<><div style={{fontSize:26,fontWeight:900}}>{money(reserve.balance)}</div><div className="progress"><i style={{width:`${emergencyPct}%`}} /></div><div className="muted">已完成 {emergencyPct.toFixed(0)}%。系统会识别“备用金”或“应急”账户；当前金额可在上方直接修改。</div></>:<div className="notice">目前没有备用金账户。需要时新增一个名称含“备用金”或“应急”的账户即可自动统计。</div>}<label>备用金目标</label><input type="number" value={state.emergencyTarget} onChange={e=>update({emergencyTarget:Math.max(0,+e.target.value)})}/></section>
         </aside>
       </div>}
 
-      {tab==="accounts"&&<div className="stack"><section className="card"><div className="section-head"><div><h2 className="section-title">我的账户</h2><div className="muted">每次只记增加或减少，余额由系统累计。</div></div><span className="tag">总计 {money(accountTotal)}</span></div><div className="account-grid">{state.accounts.map(a=><article className={`account-card ${a.tone}`} key={a.id}><span>{a.name}</span><strong>{money(a.balance)}</strong><button className="button small" onClick={()=>openAccount(a.id)}>＋ 记一笔</button></article>)}</div></section><section className="card"><h2 className="section-title">账户流水</h2>{state.accountRecords.length?[...state.accountRecords].reverse().map(r=><div className="row" key={r.id}><div><div className="name">{r.accountName||state.accounts.find(a=>a.id===r.accountId)?.name||"账户"}</div><div className="muted">{r.date}{r.note?` · ${r.note}`:""}</div></div><div className="actions"><span className={`amount ${r.delta>=0?"positive":"negative"}`}>{r.delta>=0?"+":"-"}{money(Math.abs(r.delta))}</span><button className="button danger small" onClick={()=>deleteAccountRecord(r.id)}>撤销</button></div></div>):<div className="empty">还没有账户流水，先给任一账户记一笔</div>}</section></div>}
+      {tab==="accounts"&&<div className="stack"><section className="card"><div className="section-head"><div><h2 className="section-title">我的账户</h2><div className="muted">账户可按每个人的情况新增、修改或删除。</div></div><div className="actions"><span className="tag">总计 {money(accountTotal)}</span><button className="button primary small" onClick={()=>openAccountManager()}>＋ 新增账户</button></div></div>{state.accounts.length?<div className="account-grid">{state.accounts.map(a=><article className={`account-card ${a.tone}`} key={a.id}><span>{a.name}</span><strong>{money(a.balance)}</strong><div className="account-actions"><button className="button small" onClick={()=>openAccount(a.id)}>＋ 记一笔</button><button className="button small" onClick={()=>openAccountManager(a.id)}>修改</button><button className="button danger small" onClick={()=>deleteAccount(a.id)}>删除</button></div></article>)}</div>:<div className="empty">还没有账户，点击“新增账户”开始使用</div>}</section><section className="card"><h2 className="section-title">账户流水</h2>{state.accountRecords.length?[...state.accountRecords].reverse().map(r=><div className="row" key={r.id}><div><div className="name">{r.accountName||state.accounts.find(a=>a.id===r.accountId)?.name||"已删除的账户"}</div><div className="muted">{r.date}{r.note?` · ${r.note}`:""}</div></div><div className="actions"><span className={`amount ${r.delta>=0?"positive":"negative"}`}>{r.delta>=0?"+":"-"}{money(Math.abs(r.delta))}</span><button className="button danger small" onClick={()=>deleteAccountRecord(r.id)}>撤销</button></div></div>):<div className="empty">还没有账户流水，先给任一账户记一笔</div>}</section></div>}
 
-      {tab==="indexes"&&<div className="stack"><section className="card"><div className="section-head"><div><h2 className="section-title">我关注的指数与黄金</h2><div className="muted">输入名称或代码添加。每个品种会自动刷新，并匹配适合自己的判断方法。</div></div><div className="actions"><button className="button small" disabled={marketLoading} onClick={refreshMarkets}>{marketLoading?"判断中…":"刷新判断"}</button><button className="button primary small" onClick={openIndexModal}>添加品种</button></div></div><div className="index-grid">{state.assets.map((a,index)=>{const m=markets[a.id];const failed=Boolean(m?.error);const status=m?.signal?.level||(failed?"暂不可用":marketLoading?"判断中":"正在判断");return <article className="index-card" key={a.id}><div className="asset-top"><div><div className="name">{a.name}</div><div className="muted">{a.code} · 目标比例 {a.ratio}%</div></div><span className={`signal ${signalClass(m?.signal?.level)}`}>{status}</span></div><div className="price-label">{m?.valueLabel||"当前点位"}</div><div className="index-price">{typeof m?.price==="number"?`${m.price.toLocaleString("zh-CN",{maximumFractionDigits:2})}${m.priceUnit?` ${m.priceUnit}`:""}`:"—"}</div><div className="reason"><strong>{m?.signal?.metricLabel||legacyMethods[a.code]||"历史价格位置 + 长期趋势"}</strong>{m?.signal?`：${m.signal.metricValue}。${m.signal.reason}`:`。${m?.error||"正在取得历史行情并计算。"}`}{m?.referenceNote&&<><br/><span className="reference-note">{m.referenceNote}</span></>}</div><div className="ratio-editor"><label>基础比例 %</label><input type="text" inputMode="decimal" placeholder="0" value={a.ratio===0?"":String(a.ratio)} onFocus={e=>e.currentTarget.select()} onChange={e=>updateAsset(a.id,{ratio:Math.max(0,Number(moneyDraft(e.target.value))||0)})}/></div><div className="tile-footer"><span className="muted">{m?.timestamp&&m.source?`${new Date(m.timestamp).toLocaleString("zh-CN")} · ${m.source}`:failed?"代码或数据源暂不可用":"正在获取行情"}</span><div className="actions"><button className="button small" disabled={index===0} onClick={()=>setState(s=>{const x=[...s.assets];[x[index-1],x[index]]=[x[index],x[index-1]];return{...s,assets:x}})}>上移</button><button className="button danger small" onClick={()=>removeAsset(a.id)}>取消关注</button></div></div></article>})}</div>{ratioTotal!==100&&<div className="notice" style={{marginTop:14}}>基础比例目前合计 {ratioTotal}%。系统仍会自动归一化，建议最终调整到 100%。</div>}<div className="notice" style={{marginTop:14}}>优先显示真实指数点位；只有指数源暂时取不到时，才使用跟踪基金走势辅助判断，并明确标注“跟踪基金参考价”。股票指数会按红利价值、成长科技、中小盘和普通宽基分别判断；黄金使用三年价格分位、回撤和 200 日均线。</div></section></div>}
+      {tab==="indexes"&&<div className="stack"><section className="card"><div className="section-head"><div><h2 className="section-title">我关注的指数与黄金</h2><div className="muted">输入名称或代码添加。行情文件约每 30 分钟更新一次，点击刷新即可读取最新数据。</div></div><div className="actions"><button className="button small" disabled={marketLoading} onClick={refreshMarkets}>{marketLoading?"刷新中…":"刷新最新行情"}</button><button className="button primary small" onClick={openIndexModal}>添加品种</button></div></div><div className="index-grid">{state.assets.map((a,index)=>{const m=markets[a.id];const failed=Boolean(m?.error);const status=m?.signal?.level||(failed?"暂不可用":marketLoading?"判断中":"正在判断");return <article className="index-card" key={a.id}><div className="asset-top"><div><div className="name">{a.name}</div><div className="muted">{a.code} · 目标比例 {a.ratio}%</div></div><span className={`signal ${signalClass(m?.signal?.level)}`}>{status}</span></div><div className="price-label">{m?.valueLabel||"当前点位"}</div><div className="index-price">{typeof m?.price==="number"?`${m.price.toLocaleString("zh-CN",{maximumFractionDigits:2})}${m.priceUnit?` ${m.priceUnit}`:""}`:"—"}</div><div className="reason"><strong>{m?.signal?.metricLabel||legacyMethods[a.code]||"历史价格位置 + 长期趋势"}</strong>{m?.signal?`：${m.signal.metricValue}。${m.signal.reason}`:`。${m?.error||"正在取得历史行情并计算。"}`}{m?.referenceNote&&<><br/><span className="reference-note">{m.referenceNote}</span></>}</div><div className="ratio-editor"><label>基础比例 %</label><input type="text" inputMode="decimal" placeholder="0" value={a.ratio===0?"":String(a.ratio)} onFocus={e=>e.currentTarget.select()} onChange={e=>updateAsset(a.id,{ratio:Math.max(0,Number(moneyDraft(e.target.value))||0)})}/></div><div className="tile-footer"><span className="muted">{m?.timestamp&&m.source?`${new Date(m.timestamp).toLocaleString("zh-CN")} · ${m.source}`:failed?"代码或数据源暂不可用":"正在获取行情"}</span><div className="actions"><button className="button small" disabled={index===0} onClick={()=>setState(s=>{const x=[...s.assets];[x[index-1],x[index]]=[x[index],x[index-1]];return{...s,assets:x}})}>上移</button><button className="button danger small" onClick={()=>removeAsset(a.id)}>取消关注</button></div></div></article>})}</div>{ratioTotal!==100&&<div className="notice" style={{marginTop:14}}>基础比例目前合计 {ratioTotal}%。系统仍会自动归一化，建议最终调整到 100%。</div>}<div className="notice" style={{marginTop:14}}>优先显示真实指数点位；只有指数源暂时取不到时，才使用跟踪基金走势辅助判断，并明确标注“跟踪基金参考价”。股票指数会按红利价值、成长科技、中小盘和普通宽基分别判断；黄金使用三年价格分位、回撤和 200 日均线。</div></section></div>}
 
       {tab==="records"&&<div className="grid-main"><div className="stack"><section className="card calendar-card"><div className="section-head"><div><h2 className="section-title">记录日历</h2><div className="muted">点日期查看当天的定投和账户变动</div></div><button className="button primary small" onClick={()=>setModal("buy")}>新增定投</button></div><div className="calendar-toolbar"><button className="calendar-nav" aria-label="上个月" onClick={()=>changeRecordMonth(-1)}>‹</button><strong>{monthLabel(recordMonth)}</strong><button className="calendar-nav" aria-label="下个月" onClick={()=>changeRecordMonth(1)}>›</button></div><div className="calendar-grid calendar-weekdays">{["日","一","二","三","四","五","六"].map(day=><span key={day}>{day}</span>)}</div><div className="calendar-grid">{Array.from({length:recordMonthOffset},(_,index)=><span className="calendar-blank" key={`blank-${index}`} />)}{Array.from({length:recordMonthDays},(_,index)=>{const day=index+1;const key=`${recordMonth}-${String(day).padStart(2,"0")}`;const buyTotal=buyTotalsByDate[key]||0;const accountCount=accountCountsByDate[key]||0;return <button key={key} className={`calendar-day ${selectedRecordDate===key?"selected":""} ${key===today()?"today":""}`} onClick={()=>setSelectedRecordDate(key)}><span>{day}</span>{buyTotal>0&&<small>{money(buyTotal)}</small>}<i className="calendar-dots">{buyTotal>0&&<b className="buy-dot" />}{accountCount>0&&<b className="account-dot" />}</i></button>})}</div><div className="calendar-legend"><span><i className="buy-dot" />定投</span><span><i className="account-dot" />账户变动</span></div></section><section className="card"><div className="section-head"><div><h2 className="section-title">{parseLocalDate(selectedRecordDate).toLocaleDateString("zh-CN",{month:"long",day:"numeric"})}的记录</h2><div className="muted">定投 {selectedBuyRecords.length} 笔 · 账户变动 {selectedAccountRecords.length} 笔</div></div></div>{selectedBuyRecords.map(r=><div className="row" key={r.id}><div><div className="name">{r.assetName||state.assets.find(x=>x.id===r.assetId)?.name||"已取消关注的指数"}</div><div className="muted">定投记录</div></div><div className="actions"><span className="amount">{money(r.amount)}</span><button className="button danger small" onClick={()=>deleteBuyRecord(r.id)}>删除</button></div></div>)}{selectedAccountRecords.map(r=><div className="row" key={r.id}><div><div className="name">{r.accountName||state.accounts.find(a=>a.id===r.accountId)?.name||"账户"}</div><div className="muted">{r.note||"账户流水"}</div></div><div className="actions"><span className={`amount ${r.delta>=0?"positive":"negative"}`}>{r.delta>=0?"+":"-"}{money(Math.abs(r.delta))}</span><button className="button danger small" onClick={()=>deleteAccountRecord(r.id)}>撤销</button></div></div>)}{!selectedBuyRecords.length&&!selectedAccountRecords.length&&<div className="empty">这一天还没有记录</div>}</section></div><aside className="stack"><section className="card"><h2 className="section-title">投入统计</h2><div className="row"><span>累计投入</span><strong>{money(totalInvested)}</strong></div><div className="muted" style={{marginTop:10}}>日历中的金额只统计你保存过的定投记录。</div></section><section className="card"><h2 className="section-title">本机数据与安装</h2><div className="notice" style={{marginTop:12}}>数据只保存在当前设备，朋友打开后会拥有各自独立的数据。换手机或清理浏览器前，请先下载备份。</div><button className="button primary full" onClick={installApp}>安装到手机桌面</button><button className="button full" onClick={exportData}>下载数据备份</button><label className="button full restore-button">从备份恢复<input type="file" accept="application/json" hidden onChange={e=>{importData(e.target.files?.[0]);e.currentTarget.value="";}}/></label><button className="button danger full" onClick={clearLocalData}>清空本机数据</button></section></aside></div>}
     </div>
@@ -358,6 +406,7 @@ export default function SlowInvestApp() {
     {modal==="asset"&&<div className="dialog-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)setModal(null)}}><form className="dialog" action={addAsset}><h2>添加关注品种</h2><div className="muted">可搜索常见名称，也可直接输入六位国内指数代码或海外行情代码；添加后都会自动刷新判断。</div><label>名称或代码</label><div className="search-row"><input aria-label="名称或代码" value={indexQuery} onChange={e=>setIndexQuery(e.target.value)} placeholder="例如：中证红利、000922、^NDX、黄金" onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();searchIndexes();}}}/><button type="button" className="button" disabled={indexSearching||!indexQuery.trim()} onClick={searchIndexes}>{indexSearching?"搜索中…":"搜索"}</button></div>{indexSearchError&&<div className="search-error">{indexSearchError}</div>}{indexResults.length>0&&<div className="index-results">{indexResults.map(item=><button type="button" key={item.symbol} className={`index-result ${selectedIndex?.symbol===item.symbol?"selected":""}`} onClick={()=>setSelectedIndex(item)}><span><strong>{item.name}</strong><small>{item.market} · {item.kind==="etf"?"基金":item.kind==="commodity"?"商品":"指数"}</small></span><b>{item.code}</b></button>)}</div>}{selectedIndex&&<><label>显示名称（可修改）</label><input key={selectedIndex.symbol} name="displayName" defaultValue={selectedIndex.name}/></>}<label>基础比例 %</label><input name="ratio" type="number" min="0" placeholder="0"/><div className="dialog-actions"><button type="button" className="button" onClick={()=>setModal(null)}>取消</button><button className="button primary" disabled={!selectedIndex}>添加关注</button></div></form></div>}
     {modal==="buy"&&<div className="dialog-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)setModal(null)}}><form className="dialog" action={addBuy}><h2>记录本次定投</h2><label>日期</label><input name="date" type="date" defaultValue={today()}/>{suggestions.map(a=><div key={a.id}><label>{a.name} · {a.signal?.level||"正常投"}</label><input name={a.id} type="number" step="0.01" defaultValue={a.suggested.toFixed(2)}/></div>)}<div className="dialog-actions"><button type="button" className="button" onClick={()=>setModal(null)}>取消</button><button className="button primary">保存记录</button></div></form></div>}
     {modal==="account"&&<div className="dialog-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)setModal(null)}}><form className="dialog" action={addAccountRecord}><h2>{state.accounts.find(a=>a.id===activeAccount)?.name}记一笔</h2><div className="muted">当前余额 {money(state.accounts.find(a=>a.id===activeAccount)?.balance||0)}</div><div className="form-grid"><div><label>类型</label><select name="direction" aria-label="类型"><option value="in">增加</option><option value="out">减少</option></select></div><div><label>金额</label><input name="amount" aria-label="金额" type="number" min="0.01" step="0.01" required autoFocus/></div></div><label>日期</label><input name="date" aria-label="日期" type="date" defaultValue={today()}/><label>备注（可选）</label><input name="note" aria-label="备注（可选）" placeholder="例如：本月生活费、转入备用金"/><div className="dialog-actions"><button type="button" className="button" onClick={()=>setModal(null)}>取消</button><button className="button primary">保存</button></div></form></div>}
+    {modal==="account-manage"&&<div className="dialog-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)setModal(null)}}><form className="dialog" action={saveAccount}><h2>{editingAccount?"修改账户":"新增账户"}</h2><div className="muted">名称和金额都会自动保存在当前设备。</div><label>账户名称</label><input name="name" maxLength={20} required autoFocus placeholder="例如：工资卡、支付宝、备用金" defaultValue={state.accounts.find(a=>a.id===editingAccount)?.name||""}/><label>当前金额</label><input name="balance" type="number" min="0" step="0.01" placeholder="0" defaultValue={state.accounts.find(a=>a.id===editingAccount)?.balance||""}/><div className="dialog-actions"><button type="button" className="button" onClick={()=>setModal(null)}>取消</button><button className="button primary">{editingAccount?"保存修改":"添加账户"}</button></div></form></div>}
     {modal==="plan"&&<div className="dialog-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)setModal(null)}}><form className="dialog" action={savePlan}><h2>设置我的定投计划</h2><div className="muted">月预算保持不变，系统会按本月执行次数自动拆分每次金额。</div><label>定投频率</label><select name="cadence" defaultValue={state.investPlan.cadence}><option value="daily">每天</option><option value="weekly">每周</option><option value="biweekly">每两周</option><option value="monthly">每月</option></select><div className="form-grid"><div><label>每周执行日</label><select name="weekday" defaultValue={state.investPlan.weekday}>{["周日","周一","周二","周三","周四","周五","周六"].map((x,i)=><option key={x} value={i}>{x}</option>)}</select></div><div><label>每月执行日</label><input name="monthlyDay" type="number" min="1" max="31" defaultValue={state.investPlan.monthlyDay}/></div></div><label>每两周起始日</label><input name="anchorDate" type="date" defaultValue={state.investPlan.anchorDate}/><div className="notice" style={{marginTop:12}}>只需填写与你所选频率对应的一项：每周看“每周执行日”，每月看“每月执行日”，每两周看“起始日”。每天无需额外设置。</div><div className="dialog-actions"><button type="button" className="button" onClick={()=>setModal(null)}>取消</button><button className="button primary">保存计划</button></div></form></div>}
   </main>;
 }

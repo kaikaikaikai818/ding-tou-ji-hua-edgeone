@@ -93,6 +93,7 @@ async function GET(request) {
   return Response.json({ results });
 }
 export {
+  COMMON,
   GET
 };
 export { GET as onRequestGet };
