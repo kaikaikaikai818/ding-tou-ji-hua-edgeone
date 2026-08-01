@@ -2,7 +2,11 @@
   "name": "定投计划",
   "short_name": "定投计划",
   "start_url": "/",
+  "scope": "/",
+  "id": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
+  "description": "只告诉你什么时候投、投多少，并在本机保存账户和定投记录。",
   "background_color": "#f4f7f5",
   "theme_color": "#087a68",
   "icons": [

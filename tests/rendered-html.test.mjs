@@ -1,33 +1,22 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const developmentPreviewMeta =
   /<meta(?=[^>]*\bname=["']codex-preview["'])(?=[^>]*\bcontent=["']development["'])[^>]*>/i;
 
-test("renders development preview metadata", async () => {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
-  const { default: worker } = await import(workerUrl.href);
+test("renders installable static app metadata", async () => {
+  const html = await readFile(new URL("../.next/server/app/index.html", import.meta.url), "utf8");
+  assert.match(html, developmentPreviewMeta);
+  assert.match(html, /rel="manifest" href="\/manifest\.webmanifest"/i);
+  assert.match(html, /mobile-web-app-capable/i);
+  assert.match(html, /apple-mobile-web-app-title/i);
+});
 
-  const response = await worker.fetch(
-    new Request("http://localhost/", {
-      headers: { accept: "text/html" },
-    }),
-    {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
-  );
-
-  assert.equal(response.status, 200);
-  assert.match(
-    response.headers.get("content-type") ?? "",
-    /^text\/html\b/i,
-  );
-  assert.match(await response.text(), developmentPreviewMeta);
+test("uses device-local persistence without a state API dependency", async () => {
+  const source = await readFile(new URL("../app/slow-invest-app.tsx", import.meta.url), "utf8");
+  assert.match(source, /localStorage\.setItem\(STORAGE_KEY/);
+  assert.match(source, /localStorage\.getItem\(STORAGE_KEY/);
+  assert.doesNotMatch(source, /fetch\(["']\/api\/state/);
+  await readFile(new URL("../public\/sw.js", import.meta.url), "utf8");
 });

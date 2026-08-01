@@ -18,6 +18,13 @@ type AppState = {
   assets:Asset[]; records:BuyRecord[]; accounts:Account[]; accountRecords:AccountRecord[];
 };
 
+type InstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome:"accepted"|"dismissed" }>;
+};
+
+const STORAGE_KEY = "ding-tou-ji-hua:state:v1";
+
 const defaultAccounts: Account[] = [
   { id:"living", name:"生活账户", balance:0, tone:"blue" },
   { id:"investing", name:"投资账户", balance:0, tone:"jade" },
@@ -140,10 +147,43 @@ export default function SlowInvestApp() {
   const [indexSearchError,setIndexSearchError]=useState("");
   const [recordMonth,setRecordMonth]=useState(today().slice(0,7));
   const [selectedRecordDate,setSelectedRecordDate]=useState(today());
+  const [installPrompt,setInstallPrompt]=useState<InstallPromptEvent|null>(null);
   const skipFirst=useRef(true);
 
-  useEffect(()=>{ (async()=>{ try { const r=await fetch("/api/state",{cache:"no-store"}); if(r.ok){ const data=await r.json(); if(data.state)setState(normalizeState(data.state)); } } catch {} finally { setLoaded(true); } })(); },[]);
-  useEffect(()=>{ if(!loaded)return; if(skipFirst.current){skipFirst.current=false;return;} const timer=setTimeout(async()=>{ setSaving(true); setSaveError(false); try { const r=await fetch("/api/state",{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify(state)}); if(!r.ok)throw new Error(); } catch { setSaveError(true); } finally { setSaving(false); } },450); return()=>clearTimeout(timer); },[state,loaded]);
+  useEffect(()=>{
+    queueMicrotask(()=>{
+      try {
+        const saved=localStorage.getItem(STORAGE_KEY);
+        if(saved)setState(normalizeState(JSON.parse(saved)));
+      } catch {
+        setSaveError(true);
+      } finally {
+        setLoaded(true);
+      }
+    });
+  },[]);
+  useEffect(()=>{
+    if(!loaded)return;
+    if(skipFirst.current){skipFirst.current=false;return;}
+    const timer=setTimeout(()=>{
+      setSaving(true);
+      setSaveError(false);
+      try {
+        localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+      } catch {
+        setSaveError(true);
+      } finally {
+        setSaving(false);
+      }
+    },300);
+    return()=>clearTimeout(timer);
+  },[state,loaded]);
+  useEffect(()=>{
+    if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});
+    const capture=(event:Event)=>{event.preventDefault();setInstallPrompt(event as InstallPromptEvent);};
+    window.addEventListener("beforeinstallprompt",capture);
+    return()=>window.removeEventListener("beforeinstallprompt",capture);
+  },[]);
   useEffect(()=>{ if(!loaded||!state.assets.length)return; refreshMarkets(); /* refresh when the followed list changes */ // eslint-disable-next-line react-hooks/exhaustive-deps
   },[loaded,state.assets.map(a=>a.code).join("|")]);
 
@@ -250,8 +290,41 @@ export default function SlowInvestApp() {
   }
   function deleteBuyRecord(id:string){ const r=state.records.find(x=>x.id===id); if(!r||!confirm("确定删除这条买入记录吗？"))return; setState(s=>({...s,records:s.records.filter(x=>x.id!==id),assets:s.assets.map(a=>a.id===r.assetId?{...a,cost:Math.max(0,a.cost-r.amount)}:a)})); }
   function deleteAccountRecord(id:string){ const r=state.accountRecords.find(x=>x.id===id); if(!r||!confirm("确定撤销这条账户记录吗？余额会自动回退。"))return; setState(s=>({...s,accountRecords:s.accountRecords.filter(x=>x.id!==id),accounts:s.accounts.map(a=>a.id===r.accountId?{...a,balance:a.balance-r.delta}:a)})); }
-  function exportData(){ const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`定投计划备份-${today()}.json`; a.click(); URL.revokeObjectURL(a.href); }
-  async function importData(file?:File){ if(!file)return; try{const parsed=JSON.parse(await file.text()); setState(normalizeState(parsed));}catch{alert("备份文件无法识别");} }
+  function exportData(){
+    const backup={app:"定投计划",version:1,exportedAt:new Date().toISOString(),state};
+    const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download=`定投计划备份-${today()}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+  async function importData(file?:File){
+    if(!file)return;
+    try{
+      const parsed=JSON.parse(await file.text());
+      const restored=parsed?.app==="定投计划"&&parsed?.state?parsed.state:parsed;
+      if(!restored||typeof restored!=="object"||!Array.isArray(restored.assets)||!Array.isArray(restored.accounts))throw new Error();
+      if(!confirm("恢复后会覆盖这台设备当前的数据，确定继续吗？"))return;
+      setState(normalizeState(restored));
+      alert("备份已恢复，并已保存到这台设备。");
+    }catch{alert("备份文件无法识别，请选择由本 App 下载的 JSON 文件。");}
+  }
+  function clearLocalData(){
+    if(!confirm("确定清空这台设备里的账户、定投和记录吗？建议先下载备份。"))return;
+    setState(normalizeState(initialState));
+    setMarkets({});
+    alert("本机数据已清空。");
+  }
+  async function installApp(){
+    if(installPrompt){
+      await installPrompt.prompt();
+      await installPrompt.userChoice;
+      setInstallPrompt(null);
+      return;
+    }
+    alert("iPhone：用 Safari 打开，点底部分享按钮，再选“添加到主屏幕”。\n\n安卓：点浏览器菜单，选择“安装应用”或“添加到主屏幕”。");
+  }
   function openAccount(id:string){setActiveAccount(id);setModal("account");}
   function savePlan(form:FormData){
     const cadence=String(form.get("cadence")||"monthly") as Cadence;
@@ -262,7 +335,7 @@ export default function SlowInvestApp() {
 
   if(!loaded)return <div className="loading">正在读取你的定投计划…</div>;
   return <main className="shell">
-    <header className="topbar"><div><div className="brand">定投<span>计划</span></div><div className="subtitle">账户记一笔，定投看结果</div></div><div className={`save-status ${saveError?"warn":""}`}>{saving?"保存中…":saveError?"保存失败，请检查网络":"已长期保存"}</div></header>
+    <header className="topbar"><div><div className="brand">定投<span>计划</span></div><div className="subtitle">账户记一笔，定投看结果</div></div><div className={`save-status ${saveError?"warn":""}`}>{saving?"保存中…":saveError?"本机保存失败":"已保存到本机"}</div></header>
     <div className="content">
       {tab==="today"&&<div className="grid-main">
         <div className="stack">
@@ -279,7 +352,7 @@ export default function SlowInvestApp() {
 
       {tab==="indexes"&&<div className="stack"><section className="card"><div className="section-head"><div><h2 className="section-title">我关注的指数与黄金</h2><div className="muted">输入名称或代码添加。每个品种会自动刷新，并匹配适合自己的判断方法。</div></div><div className="actions"><button className="button small" disabled={marketLoading} onClick={refreshMarkets}>{marketLoading?"判断中…":"刷新判断"}</button><button className="button primary small" onClick={openIndexModal}>添加品种</button></div></div><div className="index-grid">{state.assets.map((a,index)=>{const m=markets[a.id];const failed=Boolean(m?.error);const status=m?.signal?.level||(failed?"暂不可用":marketLoading?"判断中":"正在判断");return <article className="index-card" key={a.id}><div className="asset-top"><div><div className="name">{a.name}</div><div className="muted">{a.code} · 目标比例 {a.ratio}%</div></div><span className={`signal ${signalClass(m?.signal?.level)}`}>{status}</span></div><div className="price-label">{m?.valueLabel||"当前点位"}</div><div className="index-price">{typeof m?.price==="number"?`${m.price.toLocaleString("zh-CN",{maximumFractionDigits:2})}${m.priceUnit?` ${m.priceUnit}`:""}`:"—"}</div><div className="reason"><strong>{m?.signal?.metricLabel||legacyMethods[a.code]||"历史价格位置 + 长期趋势"}</strong>{m?.signal?`：${m.signal.metricValue}。${m.signal.reason}`:`。${m?.error||"正在取得历史行情并计算。"}`}{m?.referenceNote&&<><br/><span className="reference-note">{m.referenceNote}</span></>}</div><div className="ratio-editor"><label>基础比例 %</label><input type="text" inputMode="decimal" placeholder="0" value={a.ratio===0?"":String(a.ratio)} onFocus={e=>e.currentTarget.select()} onChange={e=>updateAsset(a.id,{ratio:Math.max(0,Number(moneyDraft(e.target.value))||0)})}/></div><div className="tile-footer"><span className="muted">{m?.timestamp&&m.source?`${new Date(m.timestamp).toLocaleString("zh-CN")} · ${m.source}`:failed?"代码或数据源暂不可用":"正在获取行情"}</span><div className="actions"><button className="button small" disabled={index===0} onClick={()=>setState(s=>{const x=[...s.assets];[x[index-1],x[index]]=[x[index],x[index-1]];return{...s,assets:x}})}>上移</button><button className="button danger small" onClick={()=>removeAsset(a.id)}>取消关注</button></div></div></article>})}</div>{ratioTotal!==100&&<div className="notice" style={{marginTop:14}}>基础比例目前合计 {ratioTotal}%。系统仍会自动归一化，建议最终调整到 100%。</div>}<div className="notice" style={{marginTop:14}}>优先显示真实指数点位；只有指数源暂时取不到时，才使用跟踪基金走势辅助判断，并明确标注“跟踪基金参考价”。股票指数会按红利价值、成长科技、中小盘和普通宽基分别判断；黄金使用三年价格分位、回撤和 200 日均线。</div></section></div>}
 
-      {tab==="records"&&<div className="grid-main"><div className="stack"><section className="card calendar-card"><div className="section-head"><div><h2 className="section-title">记录日历</h2><div className="muted">点日期查看当天的定投和账户变动</div></div><button className="button primary small" onClick={()=>setModal("buy")}>新增定投</button></div><div className="calendar-toolbar"><button className="calendar-nav" aria-label="上个月" onClick={()=>changeRecordMonth(-1)}>‹</button><strong>{monthLabel(recordMonth)}</strong><button className="calendar-nav" aria-label="下个月" onClick={()=>changeRecordMonth(1)}>›</button></div><div className="calendar-grid calendar-weekdays">{["日","一","二","三","四","五","六"].map(day=><span key={day}>{day}</span>)}</div><div className="calendar-grid">{Array.from({length:recordMonthOffset},(_,index)=><span className="calendar-blank" key={`blank-${index}`} />)}{Array.from({length:recordMonthDays},(_,index)=>{const day=index+1;const key=`${recordMonth}-${String(day).padStart(2,"0")}`;const buyTotal=buyTotalsByDate[key]||0;const accountCount=accountCountsByDate[key]||0;return <button key={key} className={`calendar-day ${selectedRecordDate===key?"selected":""} ${key===today()?"today":""}`} onClick={()=>setSelectedRecordDate(key)}><span>{day}</span>{buyTotal>0&&<small>{money(buyTotal)}</small>}<i className="calendar-dots">{buyTotal>0&&<b className="buy-dot" />}{accountCount>0&&<b className="account-dot" />}</i></button>})}</div><div className="calendar-legend"><span><i className="buy-dot" />定投</span><span><i className="account-dot" />账户变动</span></div></section><section className="card"><div className="section-head"><div><h2 className="section-title">{parseLocalDate(selectedRecordDate).toLocaleDateString("zh-CN",{month:"long",day:"numeric"})}的记录</h2><div className="muted">定投 {selectedBuyRecords.length} 笔 · 账户变动 {selectedAccountRecords.length} 笔</div></div></div>{selectedBuyRecords.map(r=><div className="row" key={r.id}><div><div className="name">{r.assetName||state.assets.find(x=>x.id===r.assetId)?.name||"已取消关注的指数"}</div><div className="muted">定投记录</div></div><div className="actions"><span className="amount">{money(r.amount)}</span><button className="button danger small" onClick={()=>deleteBuyRecord(r.id)}>删除</button></div></div>)}{selectedAccountRecords.map(r=><div className="row" key={r.id}><div><div className="name">{r.accountName||state.accounts.find(a=>a.id===r.accountId)?.name||"账户"}</div><div className="muted">{r.note||"账户流水"}</div></div><div className="actions"><span className={`amount ${r.delta>=0?"positive":"negative"}`}>{r.delta>=0?"+":"-"}{money(Math.abs(r.delta))}</span><button className="button danger small" onClick={()=>deleteAccountRecord(r.id)}>撤销</button></div></div>)}{!selectedBuyRecords.length&&!selectedAccountRecords.length&&<div className="empty">这一天还没有记录</div>}</section></div><aside className="stack"><section className="card"><h2 className="section-title">投入统计</h2><div className="row"><span>累计投入</span><strong>{money(totalInvested)}</strong></div><div className="muted" style={{marginTop:10}}>日历中的金额只统计你保存过的定投记录。</div></section><section className="card"><h2 className="section-title">备份与恢复</h2><button className="button full" onClick={exportData}>下载备份</button><label className="button full" style={{display:"block",textAlign:"center"}}>恢复备份<input type="file" accept="application/json" hidden onChange={e=>importData(e.target.files?.[0])}/></label></section></aside></div>}
+      {tab==="records"&&<div className="grid-main"><div className="stack"><section className="card calendar-card"><div className="section-head"><div><h2 className="section-title">记录日历</h2><div className="muted">点日期查看当天的定投和账户变动</div></div><button className="button primary small" onClick={()=>setModal("buy")}>新增定投</button></div><div className="calendar-toolbar"><button className="calendar-nav" aria-label="上个月" onClick={()=>changeRecordMonth(-1)}>‹</button><strong>{monthLabel(recordMonth)}</strong><button className="calendar-nav" aria-label="下个月" onClick={()=>changeRecordMonth(1)}>›</button></div><div className="calendar-grid calendar-weekdays">{["日","一","二","三","四","五","六"].map(day=><span key={day}>{day}</span>)}</div><div className="calendar-grid">{Array.from({length:recordMonthOffset},(_,index)=><span className="calendar-blank" key={`blank-${index}`} />)}{Array.from({length:recordMonthDays},(_,index)=>{const day=index+1;const key=`${recordMonth}-${String(day).padStart(2,"0")}`;const buyTotal=buyTotalsByDate[key]||0;const accountCount=accountCountsByDate[key]||0;return <button key={key} className={`calendar-day ${selectedRecordDate===key?"selected":""} ${key===today()?"today":""}`} onClick={()=>setSelectedRecordDate(key)}><span>{day}</span>{buyTotal>0&&<small>{money(buyTotal)}</small>}<i className="calendar-dots">{buyTotal>0&&<b className="buy-dot" />}{accountCount>0&&<b className="account-dot" />}</i></button>})}</div><div className="calendar-legend"><span><i className="buy-dot" />定投</span><span><i className="account-dot" />账户变动</span></div></section><section className="card"><div className="section-head"><div><h2 className="section-title">{parseLocalDate(selectedRecordDate).toLocaleDateString("zh-CN",{month:"long",day:"numeric"})}的记录</h2><div className="muted">定投 {selectedBuyRecords.length} 笔 · 账户变动 {selectedAccountRecords.length} 笔</div></div></div>{selectedBuyRecords.map(r=><div className="row" key={r.id}><div><div className="name">{r.assetName||state.assets.find(x=>x.id===r.assetId)?.name||"已取消关注的指数"}</div><div className="muted">定投记录</div></div><div className="actions"><span className="amount">{money(r.amount)}</span><button className="button danger small" onClick={()=>deleteBuyRecord(r.id)}>删除</button></div></div>)}{selectedAccountRecords.map(r=><div className="row" key={r.id}><div><div className="name">{r.accountName||state.accounts.find(a=>a.id===r.accountId)?.name||"账户"}</div><div className="muted">{r.note||"账户流水"}</div></div><div className="actions"><span className={`amount ${r.delta>=0?"positive":"negative"}`}>{r.delta>=0?"+":"-"}{money(Math.abs(r.delta))}</span><button className="button danger small" onClick={()=>deleteAccountRecord(r.id)}>撤销</button></div></div>)}{!selectedBuyRecords.length&&!selectedAccountRecords.length&&<div className="empty">这一天还没有记录</div>}</section></div><aside className="stack"><section className="card"><h2 className="section-title">投入统计</h2><div className="row"><span>累计投入</span><strong>{money(totalInvested)}</strong></div><div className="muted" style={{marginTop:10}}>日历中的金额只统计你保存过的定投记录。</div></section><section className="card"><h2 className="section-title">本机数据与安装</h2><div className="notice" style={{marginTop:12}}>数据只保存在当前设备，朋友打开后会拥有各自独立的数据。换手机或清理浏览器前，请先下载备份。</div><button className="button primary full" onClick={installApp}>安装到手机桌面</button><button className="button full" onClick={exportData}>下载数据备份</button><label className="button full restore-button">从备份恢复<input type="file" accept="application/json" hidden onChange={e=>{importData(e.target.files?.[0]);e.currentTarget.value="";}}/></label><button className="button danger full" onClick={clearLocalData}>清空本机数据</button></section></aside></div>}
     </div>
     <nav className="bottom-nav">{([['today','⌂','今天'],['accounts','▦','账户'],['indexes','◇','行情'],['records','≡','记录']] as const).map(([key,icon,label])=><button key={key} className={`nav-button ${tab===key?"active":""}`} onClick={()=>setTab(key)}><b>{icon}</b>{label}</button>)}</nav>
     {modal==="asset"&&<div className="dialog-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)setModal(null)}}><form className="dialog" action={addAsset}><h2>添加关注品种</h2><div className="muted">可搜索常见名称，也可直接输入六位国内指数代码或海外行情代码；添加后都会自动刷新判断。</div><label>名称或代码</label><div className="search-row"><input aria-label="名称或代码" value={indexQuery} onChange={e=>setIndexQuery(e.target.value)} placeholder="例如：中证红利、000922、^NDX、黄金" onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();searchIndexes();}}}/><button type="button" className="button" disabled={indexSearching||!indexQuery.trim()} onClick={searchIndexes}>{indexSearching?"搜索中…":"搜索"}</button></div>{indexSearchError&&<div className="search-error">{indexSearchError}</div>}{indexResults.length>0&&<div className="index-results">{indexResults.map(item=><button type="button" key={item.symbol} className={`index-result ${selectedIndex?.symbol===item.symbol?"selected":""}`} onClick={()=>setSelectedIndex(item)}><span><strong>{item.name}</strong><small>{item.market} · {item.kind==="etf"?"基金":item.kind==="commodity"?"商品":"指数"}</small></span><b>{item.code}</b></button>)}</div>}{selectedIndex&&<><label>显示名称（可修改）</label><input key={selectedIndex.symbol} name="displayName" defaultValue={selectedIndex.name}/></>}<label>基础比例 %</label><input name="ratio" type="number" min="0" placeholder="0"/><div className="dialog-actions"><button type="button" className="button" onClick={()=>setModal(null)}>取消</button><button className="button primary" disabled={!selectedIndex}>添加关注</button></div></form></div>}

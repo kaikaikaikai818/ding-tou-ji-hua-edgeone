@@ -13,6 +13,11 @@ export const metadata: Metadata = {
     apple: "/icon-192.png",
   },
   manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "定投计划",
+    statusBarStyle: "default",
+  },
 };
 
 export default function RootLayout({
