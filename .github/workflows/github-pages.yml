@@ -1,0 +1,67 @@
+name: 发布 App 并刷新行情
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17,47 * * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  refresh-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 获取项目
+        uses: actions/checkout@v4
+
+      - name: 使用 Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 安装项目依赖
+        run: npm ci
+
+      - name: 刷新行情数据
+        run: node scripts/update-market-data.mjs --target=public
+
+      - name: 保存最新行情到仓库
+        run: |
+          if git diff --quiet -- public/market-data.json public/index-catalog.json; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/market-data.json public/index-catalog.json
+          git commit -m "自动刷新行情数据"
+          git push || true
+
+      - name: 生成最新 App
+        run: npm run build
+        env:
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+
+      - name: 配置 GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: 上传网页
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+      - name: 发布网页
+        id: deployment
+        uses: actions/deploy-pages@v4
