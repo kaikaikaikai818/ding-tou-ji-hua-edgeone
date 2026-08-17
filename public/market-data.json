@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-08-17T22:42:56.879Z",
-  "lastAttemptAt": "2026-08-17T22:42:56.879Z",
+  "updatedAt": "2026-08-17T23:01:21.604Z",
+  "lastAttemptAt": "2026-08-17T23:01:21.604Z",
   "markets": {
     "399001": {
       "code": "399001",
@@ -133,9 +133,9 @@
     "GC=F": {
       "code": "GOLD",
       "symbol": "GC=F",
-      "price": 4468.6,
-      "changePct": 137.1742476513986,
-      "timestamp": 1787005960000,
+      "price": 4471.3,
+      "changePct": 137.31755214691367,
+      "timestamp": 1787007057000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "美元/盎司",
@@ -144,7 +144,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "三年价格分位 + 200日均线（黄金）",
-        "metricValue": "长期分位 87%，较均线 -0.4%，较一年高点 -16.0%",
+        "metricValue": "长期分位 87%，较均线 -0.4%，较一年高点 -15.9%",
         "reason": "黄金价格位置未同时达到偏低或过热条件，按基础比例投入。"
       },
       "name": "国际黄金（COMEX）",
@@ -154,9 +154,9 @@
     "GOLD": {
       "code": "GOLD",
       "symbol": "GC=F",
-      "price": 4468.6,
-      "changePct": 137.1742476513986,
-      "timestamp": 1787005960000,
+      "price": 4471.3,
+      "changePct": 137.31755214691367,
+      "timestamp": 1787007057000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "美元/盎司",
@@ -165,7 +165,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "三年价格分位 + 200日均线（黄金）",
-        "metricValue": "长期分位 87%，较均线 -0.4%，较一年高点 -16.0%",
+        "metricValue": "长期分位 87%，较均线 -0.4%，较一年高点 -15.9%",
         "reason": "黄金价格位置未同时达到偏低或过热条件，按基础比例投入。"
       },
       "name": "国际黄金（COMEX）",
@@ -1187,7 +1187,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -1.7%，较均线 4.2%",
+        "metricValue": "较一年高点 -1.7%，较均线 4.3%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "英国富时100",
@@ -1208,7 +1208,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -1.7%，较均线 4.2%",
+        "metricValue": "较一年高点 -1.7%，较均线 4.3%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "英国富时100",
