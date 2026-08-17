@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-08-17T12:00:23.292Z",
-  "lastAttemptAt": "2026-08-17T12:00:23.292Z",
+  "updatedAt": "2026-08-17T13:06:44.880Z",
+  "lastAttemptAt": "2026-08-17T13:06:44.880Z",
   "markets": {
     "399001": {
       "code": "399001",
@@ -16,7 +16,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -10.2%，较均线 3.1%",
+        "metricValue": "较一年高点 -10.2%，较均线 2.9%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "深证成指",
@@ -133,9 +133,9 @@
     "GC=F": {
       "code": "GOLD",
       "symbol": "GC=F",
-      "price": 4454.7,
-      "changePct": 136.43649487819118,
-      "timestamp": 1786967417000,
+      "price": 4441.4,
+      "changePct": 135.7305875484316,
+      "timestamp": 1786971399000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "美元/盎司",
@@ -144,7 +144,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "三年价格分位 + 200日均线（黄金）",
-        "metricValue": "长期分位 87%，较均线 -0.8%，较一年高点 -16.2%",
+        "metricValue": "长期分位 86%，较均线 -1.1%，较一年高点 -16.5%",
         "reason": "黄金价格位置未同时达到偏低或过热条件，按基础比例投入。"
       },
       "name": "国际黄金（COMEX）",
@@ -154,9 +154,9 @@
     "GOLD": {
       "code": "GOLD",
       "symbol": "GC=F",
-      "price": 4454.7,
-      "changePct": 136.43649487819118,
-      "timestamp": 1786967417000,
+      "price": 4441.4,
+      "changePct": 135.7305875484316,
+      "timestamp": 1786971399000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "美元/盎司",
@@ -165,7 +165,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "三年价格分位 + 200日均线（黄金）",
-        "metricValue": "长期分位 87%，较均线 -0.8%，较一年高点 -16.2%",
+        "metricValue": "长期分位 86%，较均线 -1.1%，较一年高点 -16.5%",
         "reason": "黄金价格位置未同时达到偏低或过热条件，按基础比例投入。"
       },
       "name": "国际黄金（COMEX）",
@@ -228,7 +228,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -0.2%，较均线 10.0%",
+        "metricValue": "较一年高点 -0.2%，较均线 10.2%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "标普500",
@@ -249,7 +249,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -0.2%，较均线 10.0%",
+        "metricValue": "较一年高点 -0.2%，较均线 10.2%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "标普500",
@@ -312,7 +312,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（成长科技）",
-        "metricValue": "较一年高点 -2.0%，较均线 12.4%",
+        "metricValue": "较一年高点 -2.0%，较均线 12.6%",
         "reason": "成长指数尚未到极端位置，按基础比例投入。"
       },
       "name": "纳斯达克100",
@@ -333,7 +333,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（成长科技）",
-        "metricValue": "较一年高点 -2.0%，较均线 12.4%",
+        "metricValue": "较一年高点 -2.0%，较均线 12.6%",
         "reason": "成长指数尚未到极端位置，按基础比例投入。"
       },
       "name": "纳斯达克100",
@@ -385,9 +385,9 @@
     "^VIX": {
       "code": "VIX",
       "symbol": "^VIX",
-      "price": 14.91,
-      "changePct": -16.65735047512577,
-      "timestamp": 1786967116000,
+      "price": 15.06,
+      "changePct": -15.818893236444943,
+      "timestamp": 1786971091000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "点",
@@ -396,7 +396,7 @@
         "level": "多投",
         "multiplier": 1.3,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -52.0%，较均线 -19.5%",
+        "metricValue": "较一年高点 -51.5%，较均线 -18.7%",
         "reason": "宽基指数回撤较深，适合提高本次投入。"
       },
       "name": "标普500波动率指数",
@@ -406,9 +406,9 @@
     "VIX": {
       "code": "VIX",
       "symbol": "^VIX",
-      "price": 14.91,
-      "changePct": -16.65735047512577,
-      "timestamp": 1786967116000,
+      "price": 15.06,
+      "changePct": -15.818893236444943,
+      "timestamp": 1786971091000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "点",
@@ -417,7 +417,7 @@
         "level": "多投",
         "multiplier": 1.3,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -52.0%，较均线 -19.5%",
+        "metricValue": "较一年高点 -51.5%，较均线 -18.7%",
         "reason": "宽基指数回撤较深，适合提高本次投入。"
       },
       "name": "标普500波动率指数",
@@ -738,7 +738,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -10.2%，较均线 3.1%",
+        "metricValue": "较一年高点 -10.2%，较均线 2.9%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "深证成指",
@@ -1061,7 +1061,7 @@
         "level": "多投",
         "multiplier": 1.3,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -23.4%，较均线 19.7%",
+        "metricValue": "较一年高点 -23.4%，较均线 18.8%",
         "reason": "宽基指数回撤较深，适合提高本次投入。"
       },
       "name": "韩国综合指数",
@@ -1082,7 +1082,7 @@
         "level": "多投",
         "multiplier": 1.3,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -23.4%，较均线 19.7%",
+        "metricValue": "较一年高点 -23.4%，较均线 18.8%",
         "reason": "宽基指数回撤较深，适合提高本次投入。"
       },
       "name": "韩国综合指数",
@@ -1103,7 +1103,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -3.9%，较均线 27.4%",
+        "metricValue": "较一年高点 -3.9%，较均线 28.3%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "台湾加权指数",
@@ -1124,7 +1124,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -3.9%，较均线 27.4%",
+        "metricValue": "较一年高点 -3.9%，较均线 28.3%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "台湾加权指数",
@@ -1134,9 +1134,9 @@
     "^STOXX50E": {
       "code": "STOXX50E",
       "symbol": "^STOXX50E",
-      "price": 6558.23,
-      "changePct": 55.120475515808344,
-      "timestamp": 1786967115000,
+      "price": 6540.1,
+      "changePct": 54.69165032652686,
+      "timestamp": 1786971090000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "点",
@@ -1145,7 +1145,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 0.0%，较均线 10.0%",
+        "metricValue": "较一年高点 -0.2%，较均线 9.9%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "欧洲斯托克50",
@@ -1155,9 +1155,9 @@
     "STOXX50E": {
       "code": "STOXX50E",
       "symbol": "^STOXX50E",
-      "price": 6558.23,
-      "changePct": 55.120475515808344,
-      "timestamp": 1786967115000,
+      "price": 6540.1,
+      "changePct": 54.69165032652686,
+      "timestamp": 1786971090000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "点",
@@ -1166,7 +1166,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 0.0%，较均线 10.0%",
+        "metricValue": "较一年高点 -0.2%，较均线 9.9%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "欧洲斯托克50",
@@ -1176,9 +1176,9 @@
     "^FTSE": {
       "code": "FTSE",
       "symbol": "^FTSE",
-      "price": 10771.35,
-      "changePct": 47.34685781510767,
-      "timestamp": 1786967121000,
+      "price": 10738.23,
+      "changePct": 46.893792235506545,
+      "timestamp": 1786971104000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "点",
@@ -1187,7 +1187,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -1.3%，较均线 4.7%",
+        "metricValue": "较一年高点 -1.6%，较均线 4.6%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "英国富时100",
@@ -1197,9 +1197,9 @@
     "FTSE": {
       "code": "FTSE",
       "symbol": "^FTSE",
-      "price": 10771.35,
-      "changePct": 47.34685781510767,
-      "timestamp": 1786967121000,
+      "price": 10738.23,
+      "changePct": 46.893792235506545,
+      "timestamp": 1786971104000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "点",
@@ -1208,7 +1208,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -1.3%，较均线 4.7%",
+        "metricValue": "较一年高点 -1.6%，较均线 4.6%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "英国富时100",
@@ -1218,9 +1218,9 @@
     "^GDAXI": {
       "code": "GDAXI",
       "symbol": "^GDAXI",
-      "price": 26452.75,
-      "changePct": 68.73712277299721,
-      "timestamp": 1786967122000,
+      "price": 26398.45,
+      "changePct": 68.39075327392534,
+      "timestamp": 1786971103000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "点",
@@ -1229,7 +1229,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 0.0%，较均线 7.9%",
+        "metricValue": "较一年高点 -0.2%，较均线 7.8%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "德国DAX",
@@ -1239,9 +1239,9 @@
     "GDAXI": {
       "code": "GDAXI",
       "symbol": "^GDAXI",
-      "price": 26452.75,
-      "changePct": 68.73712277299721,
-      "timestamp": 1786967122000,
+      "price": 26398.45,
+      "changePct": 68.39075327392534,
+      "timestamp": 1786971103000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "点",
@@ -1250,7 +1250,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 0.0%，较均线 7.9%",
+        "metricValue": "较一年高点 -0.2%，较均线 7.8%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "德国DAX",
@@ -1302,9 +1302,9 @@
     "^FCHI": {
       "code": "FCHI",
       "symbol": "^FCHI",
-      "price": 8622.08,
-      "changePct": 19.888650034623055,
-      "timestamp": 1786967115000,
+      "price": 8597.18,
+      "changePct": 19.542419497924016,
+      "timestamp": 1786971090000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "点",
@@ -1313,7 +1313,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -1.2%，较均线 5.0%",
+        "metricValue": "较一年高点 -1.5%，较均线 4.7%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "法国CAC40",
@@ -1323,9 +1323,9 @@
     "FCHI": {
       "code": "FCHI",
       "symbol": "^FCHI",
-      "price": 8622.08,
-      "changePct": 19.888650034623055,
-      "timestamp": 1786967115000,
+      "price": 8597.18,
+      "changePct": 19.542419497924016,
+      "timestamp": 1786971090000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "点",
@@ -1334,7 +1334,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -1.2%，较均线 5.0%",
+        "metricValue": "较一年高点 -1.5%，较均线 4.7%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "法国CAC40",
@@ -1355,7 +1355,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -9.4%，较均线 -2.7%",
+        "metricValue": "较一年高点 -9.4%，较均线 -2.8%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "印度孟买SENSEX",
@@ -1376,7 +1376,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -9.4%，较均线 -2.7%",
+        "metricValue": "较一年高点 -9.4%，较均线 -2.8%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "印度孟买SENSEX",
