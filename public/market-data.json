@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-08-18T23:02:00.990Z",
-  "lastAttemptAt": "2026-08-18T23:02:00.990Z",
+  "updatedAt": "2026-08-18T23:37:11.093Z",
+  "lastAttemptAt": "2026-08-18T23:37:11.093Z",
   "markets": {
     "399001": {
       "code": "399001",
@@ -133,9 +133,9 @@
     "GC=F": {
       "code": "GOLD",
       "symbol": "GC=F",
-      "price": 4387.3,
-      "changePct": 132.6122687026139,
-      "timestamp": 1787093511000,
+      "price": 4385.2,
+      "changePct": 132.50092784051748,
+      "timestamp": 1787095622000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "美元/盎司",
@@ -154,9 +154,9 @@
     "GOLD": {
       "code": "GOLD",
       "symbol": "GC=F",
-      "price": 4387.3,
-      "changePct": 132.6122687026139,
-      "timestamp": 1787093511000,
+      "price": 4385.2,
+      "changePct": 132.50092784051748,
+      "timestamp": 1787095622000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "美元/盎司",
