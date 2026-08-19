@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-08-19T23:02:32.195Z",
-  "lastAttemptAt": "2026-08-19T23:02:32.195Z",
+  "updatedAt": "2026-08-19T23:37:42.695Z",
+  "lastAttemptAt": "2026-08-19T23:37:42.695Z",
   "markets": {
     "399001": {
       "code": "399001",
@@ -133,9 +133,9 @@
     "GC=F": {
       "code": "GOLD",
       "symbol": "GC=F",
-      "price": 4577.9,
-      "changePct": 142.7177774243147,
-      "timestamp": 1787179940000,
+      "price": 4573.7,
+      "changePct": 142.49509570012196,
+      "timestamp": 1787182041000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "美元/盎司",
@@ -144,7 +144,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "三年价格分位 + 200日均线（黄金）",
-        "metricValue": "长期分位 90%，较均线 1.9%，较一年高点 -13.9%",
+        "metricValue": "长期分位 90%，较均线 1.8%，较一年高点 -14.0%",
         "reason": "黄金价格位置未同时达到偏低或过热条件，按基础比例投入。"
       },
       "name": "国际黄金（COMEX）",
@@ -154,9 +154,9 @@
     "GOLD": {
       "code": "GOLD",
       "symbol": "GC=F",
-      "price": 4577.9,
-      "changePct": 142.7177774243147,
-      "timestamp": 1787179940000,
+      "price": 4573.7,
+      "changePct": 142.49509570012196,
+      "timestamp": 1787182041000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "美元/盎司",
@@ -165,7 +165,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "三年价格分位 + 200日均线（黄金）",
-        "metricValue": "长期分位 90%，较均线 1.9%，较一年高点 -13.9%",
+        "metricValue": "长期分位 90%，较均线 1.8%，较一年高点 -14.0%",
         "reason": "黄金价格位置未同时达到偏低或过热条件，按基础比例投入。"
       },
       "name": "国际黄金（COMEX）",
@@ -396,7 +396,7 @@
         "level": "多投",
         "multiplier": 1.3,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -52.0%，较均线 -19.5%",
+        "metricValue": "较一年高点 -52.0%，较均线 -19.6%",
         "reason": "宽基指数回撤较深，适合提高本次投入。"
       },
       "name": "标普500波动率指数",
@@ -417,7 +417,7 @@
         "level": "多投",
         "multiplier": 1.3,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -52.0%，较均线 -19.5%",
+        "metricValue": "较一年高点 -52.0%，较均线 -19.6%",
         "reason": "宽基指数回撤较深，适合提高本次投入。"
       },
       "name": "标普500波动率指数",
@@ -469,19 +469,18 @@
     "000300.SS": {
       "code": "000300",
       "symbol": "000300.SS",
-      "price": 4.654,
-      "changePct": 20.82035306334372,
-      "timestamp": 1787122802000,
-      "source": "Yahoo Finance · 华泰柏瑞沪深300ETF",
-      "delayNote": "指数点位暂不可达，本次仅用华泰柏瑞沪深300ETF的历史走势辅助判断；这里显示的是基金价格，不是指数点位",
-      "referenceNote": "指数点位暂不可达，本次仅用华泰柏瑞沪深300ETF的历史走势辅助判断；这里显示的是基金价格，不是指数点位",
-      "priceUnit": "元",
-      "valueLabel": "跟踪基金参考价",
+      "price": 4588.6953,
+      "changePct": 21.26573202959832,
+      "timestamp": 1787122824000,
+      "source": "Yahoo Finance",
+      "delayNote": "行情可能延迟；判断基于历史价格位置",
+      "priceUnit": "点",
+      "valueLabel": "指数点位",
       "signal": {
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "三年价格分位 + 200日均线（大盘价值）",
-        "metricValue": "长期分位 76%，较均线 -2.1%",
+        "metricValue": "长期分位 78%，较均线 -2.2%",
         "reason": "长期位置没有进入明显极端区间，按基础比例投入。"
       },
       "name": "沪深300",
@@ -491,19 +490,18 @@
     "000300": {
       "code": "000300",
       "symbol": "000300.SS",
-      "price": 4.654,
-      "changePct": 20.82035306334372,
-      "timestamp": 1787122802000,
-      "source": "Yahoo Finance · 华泰柏瑞沪深300ETF",
-      "delayNote": "指数点位暂不可达，本次仅用华泰柏瑞沪深300ETF的历史走势辅助判断；这里显示的是基金价格，不是指数点位",
-      "referenceNote": "指数点位暂不可达，本次仅用华泰柏瑞沪深300ETF的历史走势辅助判断；这里显示的是基金价格，不是指数点位",
-      "priceUnit": "元",
-      "valueLabel": "跟踪基金参考价",
+      "price": 4588.6953,
+      "changePct": 21.26573202959832,
+      "timestamp": 1787122824000,
+      "source": "Yahoo Finance",
+      "delayNote": "行情可能延迟；判断基于历史价格位置",
+      "priceUnit": "点",
+      "valueLabel": "指数点位",
       "signal": {
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "三年价格分位 + 200日均线（大盘价值）",
-        "metricValue": "长期分位 76%，较均线 -2.1%",
+        "metricValue": "长期分位 78%，较均线 -2.2%",
         "reason": "长期位置没有进入明显极端区间，按基础比例投入。"
       },
       "name": "沪深300",
@@ -1063,7 +1061,7 @@
         "level": "多投",
         "multiplier": 1.3,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -29.0%，较均线 10.7%",
+        "metricValue": "较一年高点 -29.0%，较均线 9.9%",
         "reason": "宽基指数回撤较深，适合提高本次投入。"
       },
       "name": "韩国综合指数",
@@ -1084,7 +1082,7 @@
         "level": "多投",
         "multiplier": 1.3,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -29.0%，较均线 10.7%",
+        "metricValue": "较一年高点 -29.0%，较均线 9.9%",
         "reason": "宽基指数回撤较深，适合提高本次投入。"
       },
       "name": "韩国综合指数",
@@ -1147,7 +1145,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -1.6%，较均线 8.2%",
+        "metricValue": "较一年高点 -1.6%，较均线 8.0%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "欧洲斯托克50",
@@ -1168,7 +1166,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -1.6%，较均线 8.2%",
+        "metricValue": "较一年高点 -1.6%，较均线 8.0%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "欧洲斯托克50",
@@ -1231,7 +1229,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -1.3%，较均线 6.5%",
+        "metricValue": "较一年高点 -1.3%，较均线 6.4%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "德国DAX",
@@ -1252,7 +1250,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -1.3%，较均线 6.5%",
+        "metricValue": "较一年高点 -1.3%，较均线 6.4%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "德国DAX",
@@ -1357,7 +1355,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -10.3%，较均线 -3.6%",
+        "metricValue": "较一年高点 -10.3%，较均线 -3.8%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "印度孟买SENSEX",
@@ -1378,7 +1376,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -10.3%，较均线 -3.6%",
+        "metricValue": "较一年高点 -10.3%，较均线 -3.8%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "印度孟买SENSEX",
