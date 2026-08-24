@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-08-24T22:03:32.291Z",
-  "lastAttemptAt": "2026-08-24T22:03:32.291Z",
+  "updatedAt": "2026-08-24T22:45:26.613Z",
+  "lastAttemptAt": "2026-08-24T22:45:26.613Z",
   "markets": {
     "399001": {
       "code": "399001",
@@ -133,9 +133,9 @@
     "GC=F": {
       "code": "GOLD",
       "symbol": "GC=F",
-      "price": 4710,
-      "changePct": 145.5426962777604,
-      "timestamp": 1787605197000,
+      "price": 4717.3,
+      "changePct": 145.92326139088732,
+      "timestamp": 1787610916000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "美元/盎司",
@@ -144,7 +144,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "三年价格分位 + 200日均线（黄金）",
-        "metricValue": "长期分位 93%，较均线 4.6%，较一年高点 -11.4%",
+        "metricValue": "长期分位 93%，较均线 4.8%，较一年高点 -11.3%",
         "reason": "黄金价格位置未同时达到偏低或过热条件，按基础比例投入。"
       },
       "name": "国际黄金（COMEX）",
@@ -154,9 +154,9 @@
     "GOLD": {
       "code": "GOLD",
       "symbol": "GC=F",
-      "price": 4710,
-      "changePct": 145.5426962777604,
-      "timestamp": 1787605197000,
+      "price": 4717.3,
+      "changePct": 145.92326139088732,
+      "timestamp": 1787610916000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "美元/盎司",
@@ -165,7 +165,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "三年价格分位 + 200日均线（黄金）",
-        "metricValue": "长期分位 93%，较均线 4.6%，较一年高点 -11.4%",
+        "metricValue": "长期分位 93%，较均线 4.8%，较一年高点 -11.3%",
         "reason": "黄金价格位置未同时达到偏低或过热条件，按基础比例投入。"
       },
       "name": "国际黄金（COMEX）",
@@ -354,7 +354,7 @@
         "level": "少投",
         "multiplier": 0.65,
         "metricLabel": "一年回撤 + 区间位置（中小盘）",
-        "metricValue": "较一年高点 -2.4%，区间位置 91%",
+        "metricValue": "较一年高点 -2.4%，区间位置 90%",
         "reason": "中小盘指数处于一年区间高位，本次降低金额控制波动。"
       },
       "name": "罗素2000",
@@ -375,7 +375,7 @@
         "level": "少投",
         "multiplier": 0.65,
         "metricLabel": "一年回撤 + 区间位置（中小盘）",
-        "metricValue": "较一年高点 -2.4%，区间位置 91%",
+        "metricValue": "较一年高点 -2.4%，区间位置 90%",
         "reason": "中小盘指数处于一年区间高位，本次降低金额控制波动。"
       },
       "name": "罗素2000",
