@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-20T22:40:58.158Z",
-  "lastAttemptAt": "2026-10-20T22:40:58.158Z",
+  "updatedAt": "2026-10-21T00:59:45.432Z",
+  "lastAttemptAt": "2026-10-21T00:59:45.432Z",
   "markets": {
     "399001": {
       "code": "399001",
@@ -133,9 +133,9 @@
     "GC=F": {
       "code": "GOLD",
       "symbol": "GC=F",
-      "price": 4148.7,
-      "changePct": 108.01744885679902,
-      "timestamp": 1792535438000,
+      "price": 4138.4,
+      "changePct": 107.501002807862,
+      "timestamp": 1792543775000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "美元/盎司",
@@ -144,7 +144,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "三年价格分位 + 200日均线（黄金）",
-        "metricValue": "长期分位 73%，较均线 -8.6%，较一年高点 -22.0%",
+        "metricValue": "长期分位 73%，较均线 -8.8%，较一年高点 -22.2%",
         "reason": "黄金价格位置未同时达到偏低或过热条件，按基础比例投入。"
       },
       "name": "国际黄金（COMEX）",
@@ -154,9 +154,9 @@
     "GOLD": {
       "code": "GOLD",
       "symbol": "GC=F",
-      "price": 4148.7,
-      "changePct": 108.01744885679902,
-      "timestamp": 1792535438000,
+      "price": 4138.4,
+      "changePct": 107.501002807862,
+      "timestamp": 1792543775000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "美元/盎司",
@@ -165,7 +165,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "三年价格分位 + 200日均线（黄金）",
-        "metricValue": "长期分位 73%，较均线 -8.6%，较一年高点 -22.0%",
+        "metricValue": "长期分位 73%，较均线 -8.8%，较一年高点 -22.2%",
         "reason": "黄金价格位置未同时达到偏低或过热条件，按基础比例投入。"
       },
       "name": "国际黄金（COMEX）",
@@ -1010,9 +1010,9 @@
     "^N225": {
       "code": "N225",
       "symbol": "^N225",
-      "price": 64075.42,
-      "changePct": 104.97994840585348,
-      "timestamp": 1792478702000,
+      "price": 65257.87,
+      "changePct": 108.76265540945175,
+      "timestamp": 1792543480000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "点",
@@ -1021,7 +1021,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -11.5%，较均线 4.7%",
+        "metricValue": "较一年高点 -9.8%，较均线 6.5%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "日经225",
@@ -1031,9 +1031,9 @@
     "N225": {
       "code": "N225",
       "symbol": "^N225",
-      "price": 64075.42,
-      "changePct": 104.97994840585348,
-      "timestamp": 1792478702000,
+      "price": 65257.87,
+      "changePct": 108.76265540945175,
+      "timestamp": 1792543480000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "点",
@@ -1042,7 +1042,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -11.5%，较均线 4.7%",
+        "metricValue": "较一年高点 -9.8%，较均线 6.5%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "日经225",
@@ -1052,9 +1052,9 @@
     "^KS11": {
       "code": "KS11",
       "symbol": "^KS11",
-      "price": 5552.74,
-      "changePct": 133.7995789473684,
-      "timestamp": 1792494340000,
+      "price": 5744.86,
+      "changePct": 141.88884210526314,
+      "timestamp": 1792543180000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "点",
@@ -1063,7 +1063,7 @@
         "level": "多投",
         "multiplier": 1.3,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -39.1%，较均线 -13.5%",
+        "metricValue": "较一年高点 -37.0%，较均线 -10.6%",
         "reason": "宽基指数回撤较深，适合提高本次投入。"
       },
       "name": "韩国综合指数",
@@ -1073,9 +1073,9 @@
     "KS11": {
       "code": "KS11",
       "symbol": "^KS11",
-      "price": 5552.74,
-      "changePct": 133.7995789473684,
-      "timestamp": 1792494340000,
+      "price": 5744.86,
+      "changePct": 141.88884210526314,
+      "timestamp": 1792543180000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "点",
@@ -1084,7 +1084,7 @@
         "level": "多投",
         "multiplier": 1.3,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -39.1%，较均线 -13.5%",
+        "metricValue": "较一年高点 -37.0%，较均线 -10.6%",
         "reason": "宽基指数回撤较深，适合提高本次投入。"
       },
       "name": "韩国综合指数",
@@ -1189,7 +1189,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -1.6%，较均线 2.2%",
+        "metricValue": "较一年高点 -1.6%，较均线 2.3%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "英国富时100",
@@ -1210,7 +1210,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -1.6%，较均线 2.2%",
+        "metricValue": "较一年高点 -1.6%，较均线 2.3%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "英国富时100",
@@ -1262,9 +1262,9 @@
     "^AXJO": {
       "code": "AXJO",
       "symbol": "^AXJO",
-      "price": 8816.9,
-      "changePct": 27.768197429246307,
-      "timestamp": 1792475534000,
+      "price": 8808.7,
+      "changePct": 27.649368904603893,
+      "timestamp": 1792543154000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "点",
@@ -1273,7 +1273,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -4.9%，较均线 -0.1%",
+        "metricValue": "较一年高点 -5.0%，较均线 -0.2%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "澳大利亚标普200",
@@ -1283,9 +1283,9 @@
     "AXJO": {
       "code": "AXJO",
       "symbol": "^AXJO",
-      "price": 8816.9,
-      "changePct": 27.768197429246307,
-      "timestamp": 1792475534000,
+      "price": 8808.7,
+      "changePct": 27.649368904603893,
+      "timestamp": 1792543154000,
       "source": "Yahoo Finance",
       "delayNote": "行情可能延迟；判断基于历史价格位置",
       "priceUnit": "点",
@@ -1294,7 +1294,7 @@
         "level": "正常投",
         "multiplier": 1,
         "metricLabel": "一年回撤 + 200日均线（宽基）",
-        "metricValue": "较一年高点 -4.9%，较均线 -0.1%",
+        "metricValue": "较一年高点 -5.0%，较均线 -0.2%",
         "reason": "宽基指数没有出现明显极端位置，按基础比例投入。"
       },
       "name": "澳大利亚标普200",
